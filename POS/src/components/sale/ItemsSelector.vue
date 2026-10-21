@@ -1460,12 +1460,17 @@ function openCameraScanner() {
 async function handleCameraScan(barcode) {
 	const code = String(barcode || "").trim();
 	if (!code) return;
-	const item = await itemStore.searchByBarcode(code);
-	if (item) {
-		selectItem(item, true);
-		focusSearchInput();
-	} else {
-		showWarning(__("Item Not Found: No item found with barcode: {0}", [code]));
+	try {
+		const item = await itemStore.searchByBarcode(code);
+		if (item) {
+			selectItem(item, true);
+			focusSearchInput();
+		} else {
+			showWarning(__("Item Not Found: No item found with barcode: {0}", [code]));
+		}
+	} catch (error) {
+		console.error("Camera scan error:", error);
+		showWarning(error?.message || __("No se pudo agregar el item"));
 	}
 }
 

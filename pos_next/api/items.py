@@ -275,6 +275,11 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
 
 	res = erpnext_get_item_details(args, doc)
 
+	# erpnext returns rate=0 without a full sales context (no customer/qty).
+	# Fall back to price_list_rate so barcode scans add the item with its price.
+	if not res.get("rate") and res.get("price_list_rate"):
+		res["rate"] = res["price_list_rate"]
+
 	if item.get("is_stock_item") and warehouse:
 		res["actual_qty"] = get_stock_availability(item_code, warehouse)
 
