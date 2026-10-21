@@ -171,6 +171,17 @@
 							</svg>
 							<span class="hidden xs:inline">{{ __("Auto") }}</span>
 						</button>
+						<button
+							@click="openCameraScanner"
+							class="p-1 sm:p-1.5 rounded transition-[background-color] duration-75 touch-manipulation hover:bg-gray-100 active:bg-gray-200 text-gray-600"
+							:title="__('Scan with camera')"
+							:aria-label="__('Scan with camera')"
+						>
+							<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+							</svg>
+						</button>
 					</div>
 				</div>
 				<div class="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5 flex-shrink-0">
@@ -1003,10 +1014,14 @@
 		:uom="warehouseDialogItem.uom"
 		:company="warehouseDialogItem.company"
 	/>
+
+	<!-- Camera Scanner -->
+	<CameraScanner v-model="showCameraScanner" @detected="handleCameraScan" />
 </template>
 
 <script setup>
 import LazyImage from "@/components/common/LazyImage.vue";
+import CameraScanner from "@/components/common/CameraScanner.vue";
 import WarehouseAvailabilityDialog from "@/components/sale/WarehouseAvailabilityDialog.vue";
 import { useItemSearchStore } from "@/stores/itemSearch";
 import { usePOSSettingsStore } from "@/stores/posSettings";
@@ -1434,6 +1449,24 @@ function selectItem(item, autoAdd = false) {
 
 	emit("item-selected", item, autoAdd);
 	return true;
+}
+
+const showCameraScanner = ref(false);
+
+function openCameraScanner() {
+	showCameraScanner.value = true;
+}
+
+async function handleCameraScan(barcode) {
+	const code = String(barcode || "").trim();
+	if (!code) return;
+	const item = await itemStore.searchByBarcode(code);
+	if (item) {
+		selectItem(item, true);
+		focusSearchInput();
+	} else {
+		showWarning(__("Item Not Found: No item found with barcode: {0}", [code]));
+	}
 }
 
 function handleItemClick(itemCode) {
