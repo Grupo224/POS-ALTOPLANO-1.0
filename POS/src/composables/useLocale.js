@@ -37,6 +37,12 @@ export const SUPPORTED_LOCALES = {
 		countryCode: "us",
 		dir: "ltr",
 	},
+	es: {
+		name: "Spanish",
+		nativeName: "Espanol",
+		countryCode: "mx",
+		dir: "ltr",
+	},
 	ar: {
 		name: "Arabic",
 		nativeName: "العربية",

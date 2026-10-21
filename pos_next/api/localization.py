@@ -6,6 +6,12 @@ from frappe import translate
 
 
 @frappe.whitelist()
+
+
+def _normalize_locale(locale):
+	if not locale:
+		return locale
+	return locale.lower().split("-")[0].strip()
 def get_app_translations():
 	"""
 	Get all translations for the current user's language.
@@ -37,7 +43,7 @@ def get_user_language():
 	# Get user's language preference
 	language = frappe.db.get_value("User", frappe.session.user, "language") or "en"
 
-	return {"success": True, "locale": language.lower()}
+	return {"success": True, "locale": _normalize_locale(language)}
 
 
 @frappe.whitelist()
@@ -72,7 +78,7 @@ def get_allowed_locales_from_settings():
 		pos_settings = frappe.get_doc("POS Settings", pos_settings_list[0].name)
 
 		if pos_settings.allowed_locales and len(pos_settings.allowed_locales) > 0:
-			return {row.language.lower() for row in pos_settings.allowed_locales}
+			return {_normalize_locale(row.language) for row in pos_settings.allowed_locales}
 
 		return default_locales
 	except Exception:
@@ -107,7 +113,7 @@ def change_user_language(locale):
 		frappe.throw("Locale parameter is required", frappe.ValidationError)
 
 	# Normalize locale to lowercase
-	locale = locale.lower()
+	locale = _normalize_locale(locale)
 
 	allowed_locales = get_allowed_locales_from_settings()
 	if locale not in allowed_locales:

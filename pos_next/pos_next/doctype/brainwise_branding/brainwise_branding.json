@@ -82,7 +82,7 @@
    "reqd": 1
   },
   {
-   "default": "https://nexus.brainwise.me",
+   "default": "https://www.altoplano.mx",
    "fieldname": "brand_url",
    "fieldtype": "Data",
    "label": "Brand URL",

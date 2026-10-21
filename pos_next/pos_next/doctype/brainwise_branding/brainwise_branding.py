@@ -254,8 +254,8 @@ def get_branding_config():
 		# Return default config even on error
 		return {
 			"_t": base64.b64encode(b"Powered by").decode(),
-			"_l": base64.b64encode(b"BrainWise").decode(),
-			"_u": base64.b64encode(b"https://nexus.brainwise.me").decode(),
+			"_l": base64.b64encode(b"Altoplano").decode(),
+			"_u": base64.b64encode(b"https://www.altoplano.mx").decode(),
 			"_i": 10000,
 			"_v": True,
 			"_e": 1,

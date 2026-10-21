@@ -62,8 +62,8 @@ def get_default_config():
 	"""Return default branding configuration"""
 	return {
 		"_t": base64.b64encode(b"Powered by").decode(),
-		"_l": base64.b64encode(b"BrainWise").decode(),
-		"_u": base64.b64encode(b"https://nexus.brainwise.me").decode(),
+		"_l": base64.b64encode(b"Altoplano").decode(),
+		"_u": base64.b64encode(b"https://www.altoplano.mx").decode(),
 		"_i": 10000,
 		"_v": True,
 		"_c": "pos-footer-component",
