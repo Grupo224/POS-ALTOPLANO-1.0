@@ -1470,7 +1470,9 @@ async function handleCameraScan(barcode) {
 		}
 	} catch (error) {
 		console.error("Camera scan error:", error);
-		showWarning(error?.message || __("No se pudo agregar el item"));
+		const msgs = Array.isArray(error?.messages) ? error.messages : [];
+		const msg = msgs.length ? msgs.join(" · ") : (error?.message || error?.exc || JSON.stringify(error));
+		showWarning(msg || __("No se pudo agregar el item"));
 	}
 }
 

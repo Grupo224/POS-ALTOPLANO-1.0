@@ -326,6 +326,8 @@ def search_by_barcode(barcode, pos_profile):
 
 		# Try to resolve weighted/priced barcodes if barcode_resolver is available
 		resolved_barcode_data = None
+		# Normalize scanner input: strip whitespace / trailing newlines
+		barcode = (barcode or "").strip()
 		effective_barcode = barcode
 		from pos_next.services.barcode import resolve_barcode
 
@@ -345,6 +347,21 @@ def search_by_barcode(barcode, pos_profile):
 			# Try searching in item code field directly
 			item_code = frappe.db.get_value("Item", {"name": effective_barcode})
 			barcode_uom = None
+
+		# Code 39 check-digit tolerance: labels printed with a check digit
+		# (e.g. SKU0080) do not match the stored code (SKU008). Retry without
+		# the trailing character before giving up.
+		if not item_code and effective_barcode and len(effective_barcode) > 1:
+			stripped = effective_barcode[:-1]
+			barcode_data = frappe.db.get_value(
+				"Item Barcode", {"barcode": stripped}, ["parent", "uom"], as_dict=True
+			)
+			if barcode_data:
+				item_code = barcode_data.parent
+				barcode_uom = barcode_data.uom
+			else:
+				item_code = frappe.db.get_value("Item", {"name": stripped})
+				barcode_uom = None
 
 		if not item_code:
 			frappe.throw(_("Item with barcode {0} not found").format(barcode))

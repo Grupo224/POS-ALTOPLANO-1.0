@@ -5,11 +5,16 @@ from frappe.utils.file_manager import save_file
 
 
 def _render_qr(item_code):
-	"""QR code (PNG bytes)."""
+	"""QR code (PNG bytes).
+
+	Force a full QR Code (micro=False). Short codes like "SKU008" would
+	otherwise render as a Micro QR, which the html5-qrcode camera scanner
+	cannot decode.
+	"""
 	import segno
 
 	buf = io.BytesIO()
-	segno.make(item_code, error="m").save(buf, kind="png", scale=6)
+	segno.make(item_code, error="m", micro=False).save(buf, kind="png", scale=8)
 	buf.seek(0)
 	return buf.getvalue()
 
@@ -17,9 +22,10 @@ def _render_qr(item_code):
 def _render_barcode(item_code):
 	"""Code 39 barcode (PNG bytes), solo las barras + zona de silencio."""
 	import barcode
+	from barcode import Code39
 	from barcode.writer import ImageWriter
 
-	bc = barcode.get("code39", item_code.upper(), writer=ImageWriter())
+	bc = Code39(item_code.upper(), writer=ImageWriter(), add_checksum=False)
 	buf = io.BytesIO()
 	bc.write(buf, options={"write_text": False, "module_width": 0.35, "module_height": 15, "quiet_zone": 6.5})
 	buf.seek(0)
