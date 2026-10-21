@@ -964,6 +964,26 @@
 					>
 						{{ __("Print EOD Report") }}
 					</Button>
+
+					<Button
+						v-if="eodPrintFailed"
+						variant="solid"
+						theme="green"
+						@click="downloadEODPDFHandler"
+						:loading="pdfDownloadLoading"
+					>
+						{{ __("Download EOD PDF") }}
+					</Button>
+
+					<Button
+						v-if="eodPrintFailed"
+						variant="subtle"
+						theme="gray"
+						@click="printEODBrowserHandler"
+						:loading="browserPrintLoading"
+					>
+						{{ __("Print (browser)") }}
+					</Button>
 				</div>
 			</div>
 		</template>
@@ -979,7 +999,7 @@ import { useFormatters } from "../composables/useFormatters";
 import { useToast } from "../composables/useToast";
 import { usePOSSettingsStore } from "../stores/posSettings";
 import { usePOSShiftStore } from "../stores/posShift";
-import { printEODReport } from "../utils/printEod";
+import { printEODReport, printEODBrowser, downloadEODPDF } from "../utils/printEod";
 import TranslatedHTML from "./common/TranslatedHTML.vue";
 
 const props = defineProps({
@@ -1017,6 +1037,8 @@ const showSuccessReport = ref(false); // Track if shift is closed and showing re
 const errorMessage = ref(""); // User-friendly error message
 const eodPrintFailed = ref(null);
 const retryPrintLoading = ref(false);
+const browserPrintLoading = ref(false);
+const pdfDownloadLoading = ref(false);
 const showIdleWarning = ref(false);
 let _idleWarningTimer = null;
 
@@ -1181,6 +1203,36 @@ async function retryEodPrint() {
 		showWarning(__("EOD report did not print. Please check QZ Tray and retry."));
 	} finally {
 		retryPrintLoading.value = false;
+	}
+}
+
+async function downloadEODPDFHandler() {
+	const closingShiftName = eodPrintFailed.value?.closingShiftName;
+	if (!closingShiftName) return;
+	pdfDownloadLoading.value = true;
+	try {
+		await downloadEODPDF(closingShiftName);
+		showSuccess(__("EOD PDF downloaded"));
+	} catch (err) {
+		console.warn("[eod] pdf download failed", err);
+		showWarning(__("Could not download the EOD PDF. Please try again."));
+	} finally {
+		pdfDownloadLoading.value = false;
+	}
+}
+
+async function printEODBrowserHandler() {
+	const closingShiftName = eodPrintFailed.value?.closingShiftName;
+	if (!closingShiftName) return;
+	browserPrintLoading.value = true;
+	try {
+		await printEODBrowser(closingShiftName);
+		showSuccess(__("EOD report opened for printing"));
+	} catch (err) {
+		console.warn("[eod] browser print failed", err);
+		showWarning(__("Could not open the EOD report. Allow popups and try again."));
+	} finally {
+		browserPrintLoading.value = false;
 	}
 }
 

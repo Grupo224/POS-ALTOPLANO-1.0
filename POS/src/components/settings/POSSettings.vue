@@ -726,6 +726,31 @@
 												"
 											/>
 
+											<!-- Bluetooth Printer (Web Bluetooth — Chrome on Android) -->
+											<div
+												v-if="settings.silent_print"
+												class="ps-6 flex flex-col gap-2 border-s-2 border-indigo-200"
+											>
+												<div class="flex items-center gap-2">
+													<div
+														class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+														:class="bluetoothConnected ? 'bg-green-500' : 'bg-red-500'"
+													></div>
+													<span class="text-xs font-medium" :class="bluetoothConnected ? 'text-green-700' : 'text-red-700'">
+														{{ bluetoothConnected ? __("Bluetooth printer connected") : __("Bluetooth printer not connected") }}
+													</span>
+													<button
+														v-if="bluetoothSupported"
+														@click="handleBluetoothConnect"
+														:disabled="bluetoothConnecting"
+														class="ms-auto text-xs px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded transition-colors"
+													>
+														{{ bluetoothConnecting ? __("Connecting...") : bluetoothConnected ? __("Reconnect") : __("Connect") }}
+													</button>
+													<span v-if="!bluetoothSupported" class="ms-auto text-xs text-gray-500">{{ __("Use Chrome on Android") }}</span>
+												</div>
+												<p v-if="bluetoothConnected" class="text-xs text-green-700">{{ __("Printer") }}: {{ bluetoothPrinterName }}</p>
+											</div>
 											<!-- QZ Tray Printer Settings (shown when silent print is enabled) -->
 											<div
 												v-if="settings.silent_print"
@@ -1159,6 +1184,7 @@ import { logger } from "@/utils/logger";
 import { usePOSEvents } from "@/composables/usePOSEvents";
 import TranslatedHTML from "../common/TranslatedHTML.vue";
 import { useQzTray } from "@/composables/useQzTray";
+import { connectBluetoothPrinter, isBluetoothSupported, isBluetoothConnected, getBluetoothPrinterName } from "@/utils/webBluetoothPrint";
 
 const log = logger.create("POSSettings");
 const { detectSettingsChanges, updateSettingsSnapshot, emitStockSyncConfigured } = usePOSEvents();
@@ -1227,6 +1253,28 @@ const {
 	generateCertificate: handleSetupQzCertificate,
 	downloadCertificate: handleDownloadQzCertificate,
 } = useQzTray();
+
+// Bluetooth thermal printer (Web Bluetooth, Android Chrome)
+const bluetoothSupported = ref(isBluetoothSupported());
+const bluetoothConnected = ref(isBluetoothConnected());
+const bluetoothConnecting = ref(false);
+const bluetoothPrinterName = ref(getBluetoothPrinterName());
+
+async function handleBluetoothConnect() {
+	bluetoothConnecting.value = true;
+	try {
+		const name = await connectBluetoothPrinter();
+		bluetoothPrinterName.value = name;
+		bluetoothConnected.value = true;
+		showSuccess(__("Bluetooth printer connected"));
+	} catch (err) {
+		console.warn("[bt] connect failed", err);
+		bluetoothConnected.value = false;
+		showError(err?.message || __("Could not connect to Bluetooth printer"));
+	} finally {
+		bluetoothConnecting.value = false;
+	}
+}
 
 // Warehouse options
 const warehouseOptions = computed(() => {

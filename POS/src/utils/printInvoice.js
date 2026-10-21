@@ -4,6 +4,7 @@ import { getOfflineReceiptPayload } from "@/utils/offline/offlineReceiptCache";
 import { getOfflineInvoiceByOfflineId } from "@/utils/offline/sync";
 import { offlineWorker } from "@/utils/offline/workerClient";
 import { printHTML as qzPrintHTML } from "@/utils/qzTray";
+import { isBluetoothConnected, printReceiptBluetooth } from "@/utils/webBluetoothPrint";
 
 const log = logger.create("PrintInvoice");
 
@@ -312,7 +313,7 @@ export function buildReceiptHTML(invoiceData) {
 					${
 						invoiceData.footer
 							? ""
-							: `<div style="font-size: 10px;">Powered by <a href="https://nexus.brainwise.me" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">BrainWise</a></div>`
+							: `<div style="font-size: 10px;">Powered by <a href="https://www.altoplano.mx" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Altoplano</a></div>`
 					}
 				</div>
 			</div>`;
@@ -522,6 +523,16 @@ export async function printWithSilentFallback(invoiceData, printFormat = null) {
 	invoiceData = await hydrateLocalOnlyInvoice(invoiceData);
 	const invoiceName = invoiceData?.name;
 	if (!invoiceName) throw new Error("Invalid invoice data — missing name");
+
+	// Bluetooth thermal printer (Web Bluetooth, Android Chrome) — try first
+	if (isBluetoothConnected()) {
+		try {
+			await printReceiptBluetooth(invoiceData);
+			return { method: "bluetooth", success: true };
+		} catch (err) {
+			log.warn("Bluetooth print failed, falling back:", err?.message || err);
+		}
+	}
 
 	if (isLocalOnlyInvoiceName(invoiceName) && invoiceData.items?.length > 0) {
 		try {
