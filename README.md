@@ -29,7 +29,7 @@ Punto de venta (POS) construido sobre ERPNext, con frontend **Vue 3 + frappe-ui*
 
 ```bash
 cd ~/frappe-bench
-bench get-app git@github.com:Grupo224/posnext.git --branch version-15
+bench get-app git@github.com:Grupo224/POS-ALTOPLANO-1.0.git --branch version-15
 bench --site <sitio> install-app pos_next
 bench --site <sitio> migrate
 ```
