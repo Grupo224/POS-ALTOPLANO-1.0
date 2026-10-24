@@ -4,14 +4,11 @@
 import frappe
 from frappe import translate
 
-
-@frappe.whitelist()
-
-
 def _normalize_locale(locale):
 	if not locale:
 		return locale
 	return locale.lower().split("-")[0].strip()
+@frappe.whitelist()
 def get_app_translations():
 	"""
 	Get all translations for the current user's language.
@@ -66,7 +63,7 @@ def get_allowed_locales_from_settings():
 	Returns:
 		set: Set of allowed locale codes
 	"""
-	default_locales = {"ar", "en"}
+	default_locales = {"es", "en"}
 
 	try:
 		# Get the first POS Settings (or we could use a specific one based on user's profile)

@@ -98,7 +98,7 @@
    "label": "Localization"
   },
   {
-   "description": "Select languages available in the POS language switcher. If empty, defaults to English and Arabic.",
+   "description": "Select languages available in the POS language switcher. If empty, defaults to English and Spanish.",
    "fieldname": "allowed_locales",
    "fieldtype": "Table MultiSelect",
    "label": "Allowed Languages",

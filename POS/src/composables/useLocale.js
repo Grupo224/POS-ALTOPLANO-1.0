@@ -39,7 +39,7 @@ export const SUPPORTED_LOCALES = {
 	},
 	es: {
 		name: "Spanish",
-		nativeName: "Espanol",
+		nativeName: "Español",
 		countryCode: "mx",
 		dir: "ltr",
 	},
@@ -57,7 +57,7 @@ export const SUPPORTED_LOCALES = {
 	},
 	"pt-br": {
 		name: "Portuguese (Brazil)",
-		nativeName: "Portugues (Brasil)",
+		nativeName: "Português (Brasil)",
 		countryCode: "br",
 		dir: "ltr",
 	},
